@@ -1,8 +1,8 @@
 namespace Models;
 
 public class ObjectOperationLogEntry {
-    public Protocol Protocol { get; set; }
-    public Operation Operation { get; set; }
+    public string? Protocol { get; set; }
+    public string? Operation { get; set; }
     public int ThreadCount { get; set; }
     public int ThreadId { get; set; }
     public DateTime Start { get; set; }

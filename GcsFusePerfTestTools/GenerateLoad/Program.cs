@@ -9,7 +9,7 @@ using System.Threading;
 
 class Program {
     public static void Main(string[] args) {
-        int bufferSize64 = 1024 * 1024 * 64, bufferSize128 = 1024 * 1024 * 128, bufferSize256 = 1024 * 1024 * 256;
+        int bufferSize128 = 1024 * 1024 * 128;
         string originalName = "ubuntu.iso";
         string oldName = originalName;
         string mountPoint = "/home/liutimothy/bucket-http";
@@ -54,8 +54,8 @@ class Program {
         int threadCount, int threadId, bool enableHardDriveIo, int bufferSize) {
         try {
             ObjectOperationLogEntry objectOperationLogEntry = new ObjectOperationLogEntry() {
-                Protocol = protocol,
-                Operation = Operation.Read,
+                Protocol = protocol.ToString(),
+                Operation = Operation.Read.ToString(),
                 Bucket = bucket,
                 Object = obj,
                 ThreadCount = threadCount,
