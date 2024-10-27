@@ -9,31 +9,31 @@ using System.Threading;
 
 class Program {
     public static void Main(string[] args) {
-        int bufferSize64 = 1024 * 1024 * 64, bufferSize256 = 1024 * 1024 * 256;
+        int bufferSize64 = 1024 * 1024 * 64, bufferSize128 = 1024 * 1024 * 128, bufferSize256 = 1024 * 1024 * 256;
         string originalName = "ubuntu.iso";
         string oldName = originalName;
-        for (int i = 0; i < 30; i++) {
-            string mountPoint = "/home/liutimothy/bucket-http";
+        string mountPoint = "/home/liutimothy/bucket-http";
+        for (int i = 0; i < 40; i++) {
             string newName = Guid.NewGuid().ToString();
             File.Move($"{mountPoint}/{oldName}", $"{mountPoint}/{newName}");
             oldName = newName;
             System.Console.WriteLine($"Start {i + 1} HTTP reading {newName} ...");
             ReadSingleFile("gcs-grpc-team-liutimothy-bucket-fuse-001", mountPoint, newName, Protocol.JSON, 1,
                 1,
-                false, bufferSize64);
+                false, bufferSize128);
 
             System.Console.WriteLine("Sleep 10s ...");
             Thread.Sleep(1000 * 10);
         }
 
-        File.Move(oldName, originalName);
+        File.Move($"{mountPoint}/{oldName}", $"{mountPoint}/{originalName}");
 
         System.Console.WriteLine("Sleep 5m for switching from HTTP to gRPC ...");
         Thread.Sleep(1000 * 60 * 5);
 
         oldName = originalName;
-        for (int i = 0; i < 30; i++) {
-            string mountPoint = "/home/liutimothy/bucket-grpc";
+        mountPoint = "/home/liutimothy/bucket-grpc";
+        for (int i = 0; i < 40; i++) {
             string newName = Guid.NewGuid().ToString();
             File.Move($"{mountPoint}/{oldName}", $"{mountPoint}/{newName}");
             oldName = newName;
@@ -41,32 +41,13 @@ class Program {
             ReadSingleFile("gcs-grpc-team-liutimothy-bucket-fuse-002", mountPoint, newName, Protocol.GRPC, 1,
                 1,
                 false,
-                bufferSize64);
+                bufferSize128);
 
             System.Console.WriteLine("Sleep 10s ...");
             Thread.Sleep(1000 * 10);
         }
 
-        File.Move(oldName, originalName);
-
-        System.Console.WriteLine("Sleep 5m for switching from 64MB buffer to 256MB buffer ...");
-        Thread.Sleep(1000 * 60 * 5);
-
-        oldName = originalName;
-        for (int i = 0; i < 30; i++) {
-            string mountPoint = "/home/liutimothy/bucket-grpc";
-            string newName = Guid.NewGuid().ToString();
-            File.Move($"{mountPoint}/{oldName}", $"{mountPoint}/{newName}");
-            oldName = newName;
-            System.Console.WriteLine($"Start {i + 1} gRPC 256MB reading {newName} ...");
-            ReadSingleFile("gcs-grpc-team-liutimothy-bucket-fuse-002", mountPoint, newName, Protocol.GRPC, 1,
-                1,
-                false,
-                bufferSize256);
-
-            System.Console.WriteLine("Sleep 10s ...");
-            Thread.Sleep(1000 * 10);
-        }
+        File.Move($"{mountPoint}/{oldName}", $"{mountPoint}/{originalName}");
     }
 
     private static void ReadSingleFile(string bucket, string mountPoint, string obj, Protocol protocol,
