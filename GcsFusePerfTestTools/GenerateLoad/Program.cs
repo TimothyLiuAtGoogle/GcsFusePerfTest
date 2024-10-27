@@ -18,7 +18,7 @@ class Program {
         string mountPoint = "/home/liutimothy/bucket-http";
         for (int i = 0; i < roundCount; i++) {
             string obj = Guid.NewGuid().ToString();
-            System.Console.WriteLine($"Start {i + 1} HTTP writing {obj} ...");
+            System.Console.WriteLine($"Start {i + 1}/{roundCount} HTTP writing {obj} ...");
             WriteSingleFile("gcs-grpc-team-liutimothy-bucket-fuse-001", mountPoint, obj, Protocol.JSON, 1,
                 1,
                 false, objectSource: null, bufferSize256, objectSize: objectSize);
@@ -30,7 +30,7 @@ class Program {
         mountPoint = "/home/liutimothy/bucket-grpc";
         for (int i = 0; i < roundCount; i++) {
             string obj = Guid.NewGuid().ToString();
-            System.Console.WriteLine($"Start {i + 1} HTTP writing {obj} ...");
+            System.Console.WriteLine($"Start {i + 1}/{roundCount} gRPC writing {obj} ...");
             WriteSingleFile("gcs-grpc-team-liutimothy-bucket-fuse-002", mountPoint, obj, Protocol.GRPC, 1,
                 1,
                 false, objectSource: null, bufferSize256, objectSize: objectSize);
