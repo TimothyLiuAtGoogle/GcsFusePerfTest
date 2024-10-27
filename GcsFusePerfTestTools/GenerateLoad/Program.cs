@@ -22,9 +22,6 @@ class Program {
             WriteSingleFile("gcs-grpc-team-liutimothy-bucket-fuse-001", mountPoint, obj, Protocol.JSON, 1,
                 1,
                 false, objectSource: null, bufferSize256, objectSize: objectSize);
-
-            System.Console.WriteLine("Sleep 10s ...");
-            Thread.Sleep(1000 * 10);
         }
 
         System.Console.WriteLine("Sleep 5m for switching from HTTP to gRPC ...");
@@ -37,9 +34,6 @@ class Program {
             WriteSingleFile("gcs-grpc-team-liutimothy-bucket-fuse-002", mountPoint, obj, Protocol.GRPC, 1,
                 1,
                 false, objectSource: null, bufferSize256, objectSize: objectSize);
-
-            System.Console.WriteLine("Sleep 10s ...");
-            Thread.Sleep(1000 * 10);
         }
     }
 
@@ -57,9 +51,6 @@ class Program {
             ReadSingleFile("gcs-grpc-team-liutimothy-bucket-fuse-001", mountPoint, newName, Protocol.JSON, 1,
                 1,
                 false, bufferSize128);
-
-            System.Console.WriteLine("Sleep 10s ...");
-            Thread.Sleep(1000 * 10);
         }
 
         File.Move($"{mountPoint}/{oldName}", $"{mountPoint}/{originalName}");
@@ -78,9 +69,6 @@ class Program {
                 1,
                 false,
                 bufferSize128);
-
-            System.Console.WriteLine("Sleep 10s ...");
-            Thread.Sleep(1000 * 10);
         }
 
         File.Move($"{mountPoint}/{oldName}", $"{mountPoint}/{originalName}");
