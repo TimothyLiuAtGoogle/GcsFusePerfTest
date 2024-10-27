@@ -9,11 +9,47 @@ using System.Threading;
 
 class Program {
     public static void Main(string[] args) {
+    }
+
+    private static void WriteTest() {
+        int roundCount = 4;
+        int bufferSize256 = 1024 * 1024 * 256;
+        ulong objectSize = (ulong)1024 * 1024 * 1024 * 5; //5 GB
+        string mountPoint = "/home/liutimothy/bucket-http";
+        for (int i = 0; i < roundCount; i++) {
+            string obj = Guid.NewGuid().ToString();
+            System.Console.WriteLine($"Start {i + 1} HTTP writing {obj} ...");
+            WriteSingleFile("gcs-grpc-team-liutimothy-bucket-fuse-001", mountPoint, obj, Protocol.JSON, 1,
+                1,
+                false, objectSource: null, bufferSize256, objectSize: objectSize);
+
+            System.Console.WriteLine("Sleep 10s ...");
+            Thread.Sleep(1000 * 10);
+        }
+
+        System.Console.WriteLine("Sleep 5m for switching from HTTP to gRPC ...");
+        Thread.Sleep(1000 * 60 * 5);
+
+        mountPoint = "/home/liutimothy/bucket-grpc";
+        for (int i = 0; i < roundCount; i++) {
+            string obj = Guid.NewGuid().ToString();
+            System.Console.WriteLine($"Start {i + 1} HTTP writing {obj} ...");
+            WriteSingleFile("gcs-grpc-team-liutimothy-bucket-fuse-002", mountPoint, obj, Protocol.GRPC, 1,
+                1,
+                false, objectSource: null, bufferSize256, objectSize: objectSize);
+
+            System.Console.WriteLine("Sleep 10s ...");
+            Thread.Sleep(1000 * 10);
+        }
+    }
+
+    private static void ReadTest() {
+        int roundCount = 40;
         int bufferSize128 = 1024 * 1024 * 128;
         string originalName = "ubuntu.iso";
         string oldName = originalName;
         string mountPoint = "/home/liutimothy/bucket-http";
-        for (int i = 0; i < 40; i++) {
+        for (int i = 0; i < roundCount; i++) {
             string newName = Guid.NewGuid().ToString();
             File.Move($"{mountPoint}/{oldName}", $"{mountPoint}/{newName}");
             oldName = newName;
@@ -33,7 +69,7 @@ class Program {
 
         oldName = originalName;
         mountPoint = "/home/liutimothy/bucket-grpc";
-        for (int i = 0; i < 40; i++) {
+        for (int i = 0; i < roundCount; i++) {
             string newName = Guid.NewGuid().ToString();
             File.Move($"{mountPoint}/{oldName}", $"{mountPoint}/{newName}");
             oldName = newName;
@@ -114,6 +150,87 @@ class Program {
             Console.WriteLine($"Operation: {jsonFile}");
         } catch (Exception ex) {
             Console.WriteLine($"Error when reading `{mountPoint}/{obj}`. {ex.Message}");
+        }
+    }
+
+    private static void WriteSingleFile(string bucket, string mountPoint, string obj, Protocol protocol,
+        int threadCount, int threadId, bool enableHardDriveIo, string objectSource, int bufferSize, ulong objectSize) {
+        if (enableHardDriveIo) {
+            FileInfo fileInfo = new FileInfo(objectSource);
+            objectSize = (ulong)fileInfo.Length;
+        }
+
+        try {
+            ObjectOperationLogEntry objectOperationLogEntry = new ObjectOperationLogEntry() {
+                Protocol = protocol.ToString(),
+                Operation = Operation.Write.ToString(),
+                Bucket = bucket,
+                Object = obj,
+                ThreadCount = threadCount,
+                ThreadId = threadId,
+                EnableHardDriveIo = enableHardDriveIo,
+                Start = DateTime.Now
+            };
+
+            using FileStream? readStream =
+                enableHardDriveIo ? new FileStream(objectSource, FileMode.Open, FileAccess.Read) : null;
+            using BufferedStream bufferedStream =
+                enableHardDriveIo ? new BufferedStream(readStream, bufferSize) : null;
+            byte[] buffer = new byte[bufferSize];
+            if (!enableHardDriveIo) {
+                for (int i = 0; i < bufferSize; i++) {
+                    buffer[i] = (byte)DateTime.Now.Microsecond;
+                }
+            }
+
+            long[] init = GetCpuValues();
+            Stopwatch stopwatch = new Stopwatch();
+            using FileStream writeStream = new FileStream($"{mountPoint}/{obj}", FileMode.Create, FileAccess.Write);
+            ulong remaining = objectSize;
+            while (remaining > 0) {
+                stopwatch.Reset();
+                stopwatch.Start();
+                int bytesRead = 0;
+                if (enableHardDriveIo) {
+                    bytesRead = bufferedStream.Read(buffer, 0, buffer.Length);
+                } else {
+                    bytesRead = remaining < (ulong)bufferSize ? (int)remaining : bufferSize;
+                }
+
+                writeStream.Write(buffer, 0, bytesRead);
+
+                remaining -= (ulong)bytesRead;
+                stopwatch.Stop();
+
+                long[] curr = GetCpuValues();
+                double cpuUtil = Math.Round(CalculateCpuUtilization(init, curr) * 100, 2);
+                var memInfo = GetMemoryValues();
+                double memUtil = Math.Round((double)memInfo["MemAvailable:"] / memInfo["MemTotal:"], 2);
+                AtomOperationLogEntry atomOperationLogEntry = new AtomOperationLogEntry {
+                    Size = bytesRead,
+                    Duration = stopwatch.Elapsed,
+                    CpuUtil = cpuUtil,
+                    MemoryUtil = memUtil
+                };
+
+                objectOperationLogEntry.AtomOperationLogEntries.Add(atomOperationLogEntry);
+            }
+
+            writeStream.Flush();
+            writeStream.Close();
+            File.Delete($"{mountPoint}/{obj}");
+
+            objectOperationLogEntry.Size = objectSize;
+            objectOperationLogEntry.End = DateTime.Now;
+            objectOperationLogEntry.Duration = objectOperationLogEntry.End - objectOperationLogEntry.Start;
+
+            string timestamp = objectOperationLogEntry.End.ToString("yyyy-MM-dd-HH-mm-ss-fff");
+            string jsonFile = $"/home/liutimothy/temp/logs/{bucket}-{threadId}-{timestamp}.json";
+            string json = JsonSerializer.Serialize<ObjectOperationLogEntry>(objectOperationLogEntry);
+            File.WriteAllText(jsonFile, json);
+            Console.WriteLine($"Operation: {jsonFile}");
+        } catch (Exception ex) {
+            Console.WriteLine($"Error when writing `{mountPoint}/{obj}`. {ex.Message}");
         }
     }
 
