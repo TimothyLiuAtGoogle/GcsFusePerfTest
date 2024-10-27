@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenerateLoad", "GenerateLoad\GenerateLoad.csproj", "{1A45F12D-1F54-468C-ABF9-B4465D4BD895}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Models", "Models\Models.csproj", "{F6FC43E5-7D67-4E1E-8CFF-29A9EE434086}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1A45F12D-1F54-468C-ABF9-B4465D4BD895}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A45F12D-1F54-468C-ABF9-B4465D4BD895}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A45F12D-1F54-468C-ABF9-B4465D4BD895}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A45F12D-1F54-468C-ABF9-B4465D4BD895}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6FC43E5-7D67-4E1E-8CFF-29A9EE434086}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6FC43E5-7D67-4E1E-8CFF-29A9EE434086}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6FC43E5-7D67-4E1E-8CFF-29A9EE434086}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6FC43E5-7D67-4E1E-8CFF-29A9EE434086}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
