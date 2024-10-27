@@ -10,7 +10,8 @@ using System.Threading;
 class Program {
     public static void Main(string[] args) {
         int bufferSize64 = 1024 * 1024 * 64, bufferSize256 = 1024 * 1024 * 256;
-        string oldName = "ubuntu.iso";
+        string originalName = "ubuntu.iso";
+        string oldName = originalName;
         for (int i = 0; i < 30; i++) {
             string mountPoint = "/home/liutimothy/bucket-http";
             string newName = Guid.NewGuid().ToString();
@@ -25,10 +26,12 @@ class Program {
             Thread.Sleep(1000 * 10);
         }
 
+        File.Move(oldName, originalName);
+
         System.Console.WriteLine("Sleep 5m for switching from HTTP to gRPC ...");
         Thread.Sleep(1000 * 60 * 5);
 
-        oldName = "ubuntu.iso";
+        oldName = originalName;
         for (int i = 0; i < 30; i++) {
             string mountPoint = "/home/liutimothy/bucket-grpc";
             string newName = Guid.NewGuid().ToString();
@@ -44,9 +47,12 @@ class Program {
             Thread.Sleep(1000 * 10);
         }
 
+        File.Move(oldName, originalName);
+
         System.Console.WriteLine("Sleep 5m for switching from 64MB buffer to 256MB buffer ...");
         Thread.Sleep(1000 * 60 * 5);
 
+        oldName = originalName;
         for (int i = 0; i < 30; i++) {
             string mountPoint = "/home/liutimothy/bucket-grpc";
             string newName = Guid.NewGuid().ToString();
