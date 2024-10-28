@@ -13,7 +13,7 @@ public class ObjectOperationLogEntry {
     public string? Object { get; set; }
 
     public bool EnableHardDriveIo { get; set; }
-    public List<AtomOperationLogEntry> AtomOperationLogEntries { get; } = new List<AtomOperationLogEntry>();
+    public List<AtomOperationLogEntry> AtomOperationLogEntries { get; set; }
 }
 
 public class AtomOperationLogEntry {
