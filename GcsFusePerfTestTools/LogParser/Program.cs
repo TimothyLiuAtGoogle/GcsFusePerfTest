@@ -19,17 +19,18 @@ class Program {
 
         objectOperationLogs.Add(
             "Bucket\tObject\tOperation\tProtocol\tSizeInByte\tStart\tDurationInMillisecond\tSpeedInBitPerSec\tCpuUtil\tMemoryUtil");
-        atomOperationLogs.Add("Object\tSerial\tSizeInByte\tDurationInMillisecond\tSpeedInBitPerSec\tCpuUtil\tMemoryUtil");
+        atomOperationLogs.Add(
+            "Object\tSerial\tSizeInByte\tDurationInMillisecond\tSpeedInBitPerSec\tCpuUtil\tMemoryUtil");
         foreach (var oLog in logEntries) {
             double avgCpuUtil = oLog.AtomOperationLogEntries.Average(entry => entry.CpuUtil);
             double avgMemoryUtil = oLog.AtomOperationLogEntries.Average(entry => entry.MemoryUtil);
             string oLogLine =
-                $"{oLog.Bucket}\t{oLog.Object}\t{oLog.Operation}\t{oLog.Protocol}\t{oLog.Size}\t{oLog.Start}\t{oLog.Duration.Microseconds}\t{oLog.Size * 8 / (ulong)oLog.Duration.Seconds}\t{avgCpuUtil}\t{avgMemoryUtil}";
+                $"{oLog.Bucket}\t{oLog.Object}\t{oLog.Operation}\t{oLog.Protocol}\t{oLog.Size}\t{oLog.Start}\t{oLog.Duration.TotalMilliseconds}\t{oLog.Size * 8 / (ulong)oLog.Duration.TotalMilliseconds * 1000}\t{avgCpuUtil}\t{avgMemoryUtil}";
             objectOperationLogs.Add(oLogLine);
             int counter = 0;
             foreach (var aLog in oLog.AtomOperationLogEntries) {
                 string aLogLine =
-                    $"{oLog.Object}\t{++counter}\t{aLog.Size}\t{aLog.Duration.Microseconds}\t{aLog.Size * 8 / aLog.Duration.Seconds}\t{aLog.CpuUtil}\t{aLog.MemoryUtil}";
+                    $"{oLog.Object}\t{++counter}\t{aLog.Size}\t{aLog.Duration.TotalMilliseconds}\t{aLog.Size * 8 / aLog.Duration.TotalMilliseconds * 1000}\t{aLog.CpuUtil}\t{aLog.MemoryUtil}";
                 atomOperationLogs.Add(aLogLine);
             }
         }
